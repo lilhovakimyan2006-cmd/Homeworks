@@ -10,7 +10,7 @@
 // task 2
 
 // function toUpperCase(str) {
-//     return str.toUpperCase("hello world");
+//     return str.toUpperCase();
 // }
 
 // console.log(toUpperCase("hello world"));
@@ -36,7 +36,7 @@
 //task 5
 
 // function checkTheString(str) {
-//     return str.includes("Java") ? "Contains" : "Does not contain";
+//     return str.includes("Java") ? true : false;
 // }
 // console.log(checkTheString("Learning JavaScript"));
 
@@ -76,13 +76,13 @@
 //     let type = typeof argument;
 
 //     if (!argument && type === "object"){
-//         return "null";
+//         return "object";
 //     } else if (type === "undefined") { return type; }
 
 //     return argument.constructor.name.toLowerCase();
 // }
 
-// console.log(customTypeOf(undefined));
+// console.log(customTypeOf(null));
 
 // task 11
 
@@ -130,15 +130,15 @@
 // task 16
 
 // function isObject(arg) {
-//     return arg.constructor.name === "Object" ? true : false;
+//     return arg !== null && typeof arg === arg === "object" ? true : false;
 // }
 
-// console.log(isObject({}));
+// console.log(isObject(undefined));
 
 // task 17
 
 // function isPrimitive(arg) {
-//     return typeof arg === "object" && arg !== null ? false : true;
+//     return arg === null || ( typeof arg !== "object" && arg !== "function" ) ? false : true;
 // }
 
 // console.log(isPrimitive(12));
