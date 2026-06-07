@@ -3,14 +3,22 @@ class Node {
     value;
     constructor(value, next = null) {
         this.value = value;
-        this.next = next;
+        this.#next = next;
+    }
+
+    get next() {
+        return this.#next;
+    }
+
+    set next(node) {
+        this.#next = node;
     }
 }
 
 class SinglyLinkedList {
     #head;
     constructor(value) {
-        this.#head = value ? new Node(value) : null;
+        this.#head = value !== undefined ? new Node(value) : null;
     }
 
     empty() {
@@ -66,11 +74,11 @@ class SinglyLinkedList {
         if (!Number.isInteger(index)) {
             throw new Error("Index must be an integer");
         }
-        if (index < 0 || index >= this.size()) {
-            throw new Error("Invalid index");
-        }
         if (this.empty()) {
             throw new Error("List is empty");
+        }
+        if (index < 0 || index >= this.size()) {
+            throw new Error("Invalid index");
         }
 
         let current = this.#head;
@@ -152,13 +160,13 @@ class SinglyLinkedList {
         if (this.empty()) {
             throw new Error("List is empty");
         }
-        if (index >= this.size()) {
+        if (index >= this.size() || index < 0) {
             throw new Error("Invalid index");
     
         }
 
         if (index === 0) {
-            this.pushFront(value);
+            this.pushBack(value);
             return;
         }
 
@@ -180,7 +188,7 @@ class SinglyLinkedList {
         if (this.empty()) {
             throw new Error("List is empty");
         }
-        if (index >= this.size()) {
+        if (index >= this.size() || index < 0) {
             throw new Error("Invalid index");
     
         }
