@@ -160,12 +160,16 @@ class SinglyLinkedList {
         if (this.empty()) {
             throw new Error("List is empty");
         }
-        if (index >= this.size() || index < 0) {
+        if (index > this.size() || index < 0) {
             throw new Error("Invalid index");
-    
         }
 
         if (index === 0) {
+            this.pushFront(value);
+            return;
+        }
+
+        if (index === this.size()) {
             this.pushBack(value);
             return;
         }
