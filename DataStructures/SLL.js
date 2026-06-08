@@ -157,9 +157,6 @@ class SinglyLinkedList {
         if (!Number.isInteger(index)) {
             throw new Error("Index is not integer");
         }
-        if (this.empty()) {
-            throw new Error("List is empty");
-        }
         if (index > this.size() || index < 0) {
             throw new Error("Invalid index");
         }
