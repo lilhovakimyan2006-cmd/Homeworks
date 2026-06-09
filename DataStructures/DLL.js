@@ -279,7 +279,7 @@ class DoublyLinkedList {
         return this.#head;
     }
 
-    [Symbol.iterator]() {
+    *[Symbol.iterator]() {
         let current = this.#head;
 
         while (current) {
@@ -288,25 +288,12 @@ class DoublyLinkedList {
         }
     }
 
-    reverseIterator() {
+    *reverseIterator() {
         let current = this.#tail;
 
-        return {
-            next: () => {
-                if (current) {
-                    let result = {
-                        value: current.value,
-                        done: false
-                    }
-                    current = current.prev;
-                    return result;
-                } else {
-                    return {
-                        value: undefined,
-                        done: true
-                    }
-                }
-            }
+        while (current) {
+            yield current.value;
+            current = current.prev;
         }
     }
 
