@@ -282,22 +282,9 @@ class DoublyLinkedList {
     [Symbol.iterator]() {
         let current = this.#head;
 
-        return {
-            next: () => {
-                if (current) {
-                    let result = {
-                        value: current.value,
-                        done: false
-                    }
-                    current = current.next;
-                    return result;
-                } else {
-                    return {
-                        value: undefined,
-                        done: true
-                    }
-                }
-            }
+        while (current) {
+            yield current.value;
+            current = current.next;
         }
     }
 
