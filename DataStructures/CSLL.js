@@ -302,34 +302,13 @@ class CyclicSinglyLinkedList {
         this.#head = previous;
     }
 
-    [Symbol.iterator]() {
-        if (this.empty()) {
-            return {
-                next: () => ({
-                    value: undefined,
-                    done: true
-                })
-            }
-        }
+    *[Symbol.iterator]() {
         let current = this.#head;
-        let first = true;
-        return {
-            next: () => {
-                if (!first && current === this.#head) {
-                    return {
-                        value: undefined,
-                        done: true
-                    };
-                }
-                let result = {
-                    value: current.value,
-                    done: false
-                };
-                current = current.next;
-                first = false;
-                return result;
-            }
-        };
+        
+        do {
+            yield current.value;
+            current = current.next;
+        } while (current !== this.#head);
     }
 
     *entries() {
