@@ -265,24 +265,12 @@ class SinglyLinkedList {
         return this.#head = previous;
     }
 
-    [Symbol.iterator]() {
+    *[Symbol.iterator]() {
         let current = this.#head;
 
-        return {
-            next: () => {
-                if (current) {
-                    const result = { 
-                        value: current.value, 
-                        done: false 
-                    };
-                    current = current.next;
-                    return result;
-                }
-                return { 
-                    value: undefined, 
-                    done: true 
-                }
-            }
+        while (current) {
+            yield current.value;
+            current = current.next;
         }
     }
 
@@ -295,25 +283,73 @@ class SinglyLinkedList {
             current = current.next;
         }
     }
+
+    sort() {
+        this.#head = this.mergeSort(this.#head);
+    }
+
+    mergeSort(head) {
+        if (!head || !head.next) {
+            return head;
+        }
+
+        let mid = this.#getMiddle(head);
+        let rightHead = mid.next;
+        mid.next = null;
+        head = this.mergeSort(head);
+        rightHead = this.mergeSort(rightHead);
+        return this.#merge(head, rightHead);
+    }
+
+    #merge(leftHead, rightHead) {
+        let dummy = new Node(0);
+        let tmp = dummy;
+
+        while (leftHead && rightHead) {
+            if (leftHead.value > rightHead.value) {
+                tmp.next = rightHead;
+                rightHead = rightHead.next;
+            } else {
+                tmp.next = leftHead;
+                leftHead = leftHead.next;
+            }
+            tmp = tmp.next;
+        }
+
+        tmp.next = leftHead || rightHead;
+
+        return dummy.next;
+    }
+
+    #getMiddle(head) {
+        let slow = head;
+        let fast = head.next;
+
+        while (fast && fast.next) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+
+        return slow;
+    }
 }
 
 const list = new SinglyLinkedList();
 
-list.pushBack(10);
-list.pushBack(20);
 list.pushBack(30);
+list.pushBack(20);
+list.pushBack(10);
 
 list.insert(1, 15);
 
+list.sort();
+
 console.log(list.toArray());
-// [10, 15, 20, 30]
 
 list.erase(2);
 
 console.log(list.toArray());
-// [10, 15, 30]
 
 list.reverse();
 
 console.log(list.toArray());
-// [30, 15, 10]
