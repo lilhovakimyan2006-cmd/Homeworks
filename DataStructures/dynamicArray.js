@@ -314,7 +314,7 @@ class DArray {
     }
 
     sort(compareFn) {
-        if (this.isEmpty()) {
+        if (this.empty()) {
             throw new Error("Empty Array!");
         }
         const partitionLast = (low, high) => {
