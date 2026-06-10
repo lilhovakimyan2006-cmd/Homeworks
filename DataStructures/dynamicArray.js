@@ -312,4 +312,30 @@ class DArray {
         }
         return false;
     }
+
+    sort(compareFn) {
+        if (this.isEmpty()) {
+            throw new Error("Empty Array!");
+        }
+        const partitionLast = (low, high) => {
+            let pivot = this.#arr[high];
+            let i = low - 1;
+            for (let j = low; j < high; ++j) {
+                if(compareFn(this.#arr[j] < pivot) < 0) {
+                    this.swap(++i, j)
+                }
+            }
+            this.swap(i + 1, high);
+            return i + 1;
+        }
+
+        const quickSortLast = (low, high) => {
+            if (low < high) {
+                let p1 = partitionLast(low, high);
+                quickSortLast(low, p1 - 1);
+                quickSortLast(p1 + 1, high);
+            }
+        }
+        quickSortLast(0, this.#size - 1);
+    }
 }
