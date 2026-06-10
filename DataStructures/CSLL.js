@@ -293,9 +293,11 @@ class CyclicSinglyLinkedList {
 
         do {
             let next = current.next;
+            
             current.next = previous;
             previous = current;
             current = next;
+
         } while (current !== oldHead);
 
         oldHead.next = previous;
