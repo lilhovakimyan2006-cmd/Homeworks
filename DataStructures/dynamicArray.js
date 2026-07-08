@@ -1,4 +1,4 @@
-class DArray {
+export class DArray {
     #size;
     #capacity;
     #arr;
@@ -10,10 +10,19 @@ class DArray {
         if (initialCapacity <= 0) {
             throw new Error("Capacity must be positive");
         }
+
         this.#capacity = initialCapacity;
         this.#CAR_EXPONENT = 2;
         this.#arr = new Int32Array(initialCapacity);
         this.#size = 0;
+    }
+
+    get size() {
+        return this.#size;
+    }
+
+    get capacity() {
+        return this.#capacity;
     }
 
     #resize(newCapacity, fill = 0) {
@@ -26,11 +35,13 @@ class DArray {
         if (!Number.isInteger(fill)) {
             throw new Error("Fill number must be an integer");
         }
-        if (newCapacity <= this.#size) this.#size = newCapacity;
+        if (newCapacity < this.#size) this.#size = newCapacity;
+
         let newArr = new Int32Array(newCapacity).fill(fill);
         for (let i = 0; i < this.#size; ++i) {
             newArr[i] = this.#arr[i];
         }
+
         this.#capacity = newCapacity;
         this.#arr = newArr;
     }
@@ -43,6 +54,7 @@ class DArray {
             let newCap = this.#capacity * this.#CAR_EXPONENT;
             this.#resize(newCap);
         }
+
         this.#arr[this.#size++] = elm;
     }
 
@@ -50,7 +62,13 @@ class DArray {
         if (this.empty()) {
             throw new Error("Empty array");
         }
+
         let res = this.#arr[--this.#size];
+        
+        if (this.#size <= this.#capacity / 4 && this.#capacity > 1) {
+            this.#resize(Math.max(1, Math.floor(this.#capacity / 2)));
+        }
+
         return res;
     }
 
@@ -64,6 +82,7 @@ class DArray {
         if (index >= this.#size) {
             throw new Error("Index Error: Out of range");
         }
+
         for (let i = index; i < this.#size - 1; ++i) {
             this.#arr[i] = this.#arr[i + 1];
         }  
@@ -81,6 +100,7 @@ class DArray {
         if (index >= this.#size) {
             throw new Error("Index Error: Out of range");
         }
+
         return this.#arr[index];
     }
 
@@ -105,56 +125,46 @@ class DArray {
          if (!Number.isInteger(value)) {
             throw new Error("Value must be an integer");
         }
+
         this.#arr[i] = value;
     }
 
     front() {
+        if (this.empty()) throw new Error("Empty array");
+
         return this.#arr[0];
     }
 
     back() {
+        if (this.empty()) throw new Error("Empty array");
+
         return this.#arr[this.#size - 1];
     }
 
-    capacity() {
-        return this.#capacity;
-    }
-
-    [Symbol.iterator]() {
-        if (this.empty()) {
-            return {
-                value: undefined,
-                done: true
-            }
-        }
-        let i = 0;
-        return {
-            next: () => {
-                if (i < this.#size) {
-                    value: this.#arr[i++]
-                    done: false
-                }
-            }
-        };
+    *[Symbol.iterator]() {
+        yield* this.values();
     }
 
     reserve(n) {
-        if (n < 0) {
-            throw new Error("Memory must be positive");
+        if (!Number.isInteger(n) || n < 0) {
+            throw new Error("Memory must be a positive integer");
         }
+
         if (n <= this.#capacity) return;
         this.#resize(n);
     }
 
     shrinkToFit() {
-        this.#resize(this.#size);
+        this.#resize(Math.max(1, this.#size));
     }
 
     toArray() {
         let newArr = new Array(this.#size);
+
         for (let i = 0; i < this.#size; ++i) {
             newArr[i] = this.#arr[i];
         }
+
         return newArr;
     }
 
@@ -162,7 +172,7 @@ class DArray {
         if (!Number.isInteger(pos)) {
             throw new Error("Index must be an interger.");
         }
-        if (pos < 0 || pos >= this.#size) {
+        if (pos < 0 || pos > this.#size) {
             throw new Error("Index Error: Out of range");
         }
         if (!Number.isInteger(value)) {
@@ -172,7 +182,8 @@ class DArray {
             let newCap = this.#capacity * this.#CAR_EXPONENT;
             this.#resize(newCap);
         }
-        for (let i = this.#size; i >= pos; --i) {
+
+        for (let i = this.#size; i > pos; --i) {
             this.#arr[i] = this.#arr[i - 1];
         }
         this.#arr[pos] = value;
@@ -186,6 +197,7 @@ class DArray {
         if (i < 0 || i >= this.#size || j < 0 || j >= this.#size) {
             throw new Error("Index Error: Out of range");
         }
+
         [this.#arr[i], this.#arr[j]] = [this.#arr[j], this.#arr[i]];
     }
 
@@ -220,11 +232,14 @@ class DArray {
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+        
         let newArr = new DArray();
+        
         for (let i = 0; i < this.#size; ++i) {
             let res = callback.call(thisArg, this.#arr[i], i, this);
             newArr.pushBack(res);
         }
+
         return newArr;
     }
 
@@ -232,26 +247,39 @@ class DArray {
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+
         let newArr = new DArray();
+        
         for(let i = 0; i < this.#size; ++i) {
             if (callback.call(thisArg, this.#arr[i], i, this)) {
                 newArr.pushBack(this.#arr[i]);
             }
         }
+
         return newArr;
     }
 
     reduce(callback, initialValue) {
-        if (!Number.isInteger(initialValue)) {
-            throw new Error("Initial number must be an interger.");
-        }
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+
+        if (this.#size === 0 && initialValue === undefined) {
+            throw new Error('Reduce of empty array with no initial value');
+        }
+
         let acc = initialValue;
-        for (let i = 0; i < this.#size; ++i) {
+        let startIndex = 0;
+
+        if (initialValue === undefined) {
+            acc = this.#arr[0];
+            startIndex = 1;
+        } 
+
+        for (let i = startIndex; i < this.#size; ++i) {
             acc = callback(acc, this.#arr[i], i, this);
         }
+        
         return acc;
     }
 
@@ -259,11 +287,13 @@ class DArray {
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+        
         for (let i = 0; i < this.#size; ++i) {
             if (callback.call(thisArg, this.#arr[i], i, this)) {
                 return true;
             }
         }
+        
         return false;
     }
 
@@ -271,11 +301,13 @@ class DArray {
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+        
         for (let i = 0; i < this.#size; ++i) {
             if (!callback.call(thisArg, this.#arr[i], i, this)) {
                 return false;
             }
         }
+        
         return true;
     }
 
@@ -283,11 +315,13 @@ class DArray {
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+        
         for (let i = 0; i < this.#size; ++i) {
             if (callback.call(thisArg, this.#arr[i], i, this)) {
                 return this.#arr[i];
             }
         }
+        
         return undefined;
     }
 
@@ -295,21 +329,21 @@ class DArray {
         if (typeof callback !== "function") {
             throw new TypeError("Callback must be a function");
         }
+        
         for (let i = 0; i < this.#size; ++i) {
             if (callback.call(thisArg, this.#arr[i], i, this)) {
                 return i;
             }
         }
+        
         return -1;
     }
 
     includes(value) {
-        if (!Number.isInteger(value)) {
-            throw new Error("Value must be an integer");
-        }
         for (let i = 0; i < this.#size; ++i) {
             if (this.#arr[i] === value) return true;
         }
+        
         return false;
     }
 
@@ -317,15 +351,21 @@ class DArray {
         if (this.empty()) {
             throw new Error("Empty Array!");
         }
+        if (typeof compareFn !== "function") {
+            compareFn = (a, b) => a - b;
+        }
+        
         const partitionLast = (low, high) => {
             let pivot = this.#arr[high];
             let i = low - 1;
+
             for (let j = low; j < high; ++j) {
-                if(compareFn(this.#arr[j] < pivot) < 0) {
+                if(compareFn(this.#arr[j], pivot) < 0) {
                     this.swap(++i, j)
                 }
             }
             this.swap(i + 1, high);
+
             return i + 1;
         }
 
@@ -336,6 +376,7 @@ class DArray {
                 quickSortLast(p1 + 1, high);
             }
         }
+
         quickSortLast(0, this.#size - 1);
     }
 }
