@@ -83,18 +83,31 @@ class DoublyLinkedList {
         if (!Number.isInteger(index)) {
             throw new Error("Index must be an integer");
         }
-        if (index < 0 || index >= this.size()) {
+
+        const size = this.size();
+
+        if (index < 0 || index >= size) {
             throw new Error("Index Error: Out of range");
         }
 
-        let current = this.#head;
+        if (index < size / 2) {
+            let current = this.#head;
 
-        while (index) {
-            --index;
-            current = current.next;
+            while (index--) {
+                current = current.next;
+            }
+
+            return current.value;
+        } else {
+            let current = this.#tail;
+            let i = size - 1;
+
+            while (i-- > index) {
+                current = current.prev;
+            }
+
+            return current.value;
         }
-
-        return current.value;
     }
 
     pushFront(value) {
@@ -158,13 +171,22 @@ class DoublyLinkedList {
     }
 
     insert(index, value) {
-        if (this.empty()) {
-            throw new Error("List is empty");
-        }
         if (!Number.isInteger(index)) {
             throw new Error("Index must be an integer");
         }
-        if (index < 0 || index >= this.size()) {
+
+        if (this.empty()) {
+            if (index === 0) {
+                this.pushFront(value);
+                return;
+            } else {
+                throw new Error("List is empty");
+            }
+        }
+
+        const size = this.size();
+
+        if (index < 0 || index > size) {
             throw new Error("Index Error: Out of range");
         }
 
@@ -173,21 +195,33 @@ class DoublyLinkedList {
             return;
         }
 
-        if (index === this.size()) {
+        if (index === size) {
             this.pushBack(value);
             return;
         }
 
-        let newNode = new Node(value);
-        let current = this.#head;
+        let current;
 
-        while (index) {
-            --index;
-            current = current.next;
+        if (index < size / 2) {
+            current = this.#head;
+
+            while (index--) {
+                current = current.next;
+            }
+        } else {
+            current = this.#tail;
+            let i = size - 1;
+
+            while (i-- > index) {
+                current = current.prev;
+            }
         }
-    
+
+        const newNode = new Node(value);
+
         newNode.next = current;
         newNode.prev = current.prev;
+
         current.prev.next = newNode;
         current.prev = newNode;
     }
@@ -199,29 +233,44 @@ class DoublyLinkedList {
         if (!Number.isInteger(index)) {
             throw new Error("Index must be an integer");
         }
-        if (index < 0 || index >= this.size()) {
+
+        const size = this.size();
+
+        if (index < 0 || index >= size) {
             throw new Error("Index Error: Out of range");
         }
 
         if (index === 0) {
-            this.popFront();
-            return;
+            return this.popFront();
         }
 
-        if (index === this.size() - 1) {
-            this.popBack();
-            return;
+        if (index === size - 1) {
+            return this.popBack();
         }
 
-        let current = this.#head;
+        let current;
 
-        while (index) {
-            --index;
-            current = current.next;
+        if (index < size / 2) {
+            current = this.#head;
+
+            while (index--) {
+                current = current.next;
+            }
+        } else {
+            current = this.#tail;
+            let i = size - 1;
+
+            while (i-- > index) {
+                current = current.prev;
+            }
         }
+
+        const value = current.value;
 
         current.prev.next = current.next;
         current.next.prev = current.prev;
+
+        return value;
     }
 
     find(value) {
@@ -253,12 +302,11 @@ class DoublyLinkedList {
     }
 
     toArray() {
-        let arr = new Array(this.size());
+        let arr = [];
         let current = this.#head;
-        let size = this.size();
 
-        for (let i = 0; i < size; ++i) {
-            arr[i] = current.value;
+        while (current) {
+            arr.push(current.value);
             current = current.next;
         }
 
@@ -276,7 +324,6 @@ class DoublyLinkedList {
         }
 
         [this.#head, this.#tail] = [this.#tail, this.#head];
-        return this.#head;
     }
 
     *[Symbol.iterator]() {
