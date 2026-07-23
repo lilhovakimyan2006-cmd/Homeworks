@@ -17,8 +17,10 @@ class Node {
 
 class SinglyLinkedList {
     #head;
+    #size;
     constructor(value) {
         this.#head = value !== undefined ? new Node(value) : null;
+        this.#size = value !== undefined ? 1 : 0;
     }
 
     empty() {
@@ -26,26 +28,12 @@ class SinglyLinkedList {
     }
 
     size() {
-        if (this.empty()) {
-            return 0;
-        }
-        if (this.#head.next === null) {
-            return 1;
-        }
-        
-        let size = 0;
-        let current = this.#head;
-        
-        while (current) {
-            ++size;
-            current = current.next;
-        }
-        
-        return size;
+        return this.#size;
     }
 
     clear() {
         this.#head = null;
+        this.#size = 0;
     }
 
     front() {
@@ -77,7 +65,7 @@ class SinglyLinkedList {
         if (this.empty()) {
             throw new Error("List is empty");
         }
-        if (index < 0 || index >= this.size()) {
+        if (index < 0 || index >= this.#size) {
             throw new Error("Invalid index");
         }
 
@@ -94,22 +82,26 @@ class SinglyLinkedList {
     pushFront(value) {
         if (this.empty()) {
             this.#head = new Node(value);
+            ++this.#size;
             return;
         }
 
         let newNode = new Node(value);
         newNode.next = this.#head;
         this.#head = newNode;
+        ++this.#size
     }
 
     pushBack(value) {
         if (this.empty()) {
             this.#head = new Node(value);
+            ++this.#size;
             return;
         }
 
         if (this.#head.next === null) {
             this.#head.next = new Node(value);
+            ++this.#size;
             return;
         }
 
@@ -119,6 +111,7 @@ class SinglyLinkedList {
             current = current.next;
         }
         current.next = new Node(value);
+        ++this.#size;
     }
 
     popFront() {
@@ -128,7 +121,7 @@ class SinglyLinkedList {
 
         let value = this.#head.value;
         this.#head = this.#head.next;
-        
+        --this.#size;
         return value;
     }
 
@@ -139,6 +132,7 @@ class SinglyLinkedList {
         if (this.#head.next === null) {
             let val = this.#head.value;
             this.#head = null;
+            --this.#size;
             return val;
         }
 
@@ -150,6 +144,7 @@ class SinglyLinkedList {
         
         let res = current.next.value;
         current.next = null;
+        --this.#size;
         return res;
     }
 
@@ -157,7 +152,7 @@ class SinglyLinkedList {
         if (!Number.isInteger(index)) {
             throw new Error("Index is not integer");
         }
-        if (index > this.size() || index < 0) {
+        if (index > this.#size || index < 0) {
             throw new Error("Invalid index");
         }
 
@@ -166,7 +161,7 @@ class SinglyLinkedList {
             return;
         }
 
-        if (index === this.size()) {
+        if (index === this.#size) {
             this.pushBack(value);
             return;
         }
@@ -180,6 +175,7 @@ class SinglyLinkedList {
         let newNode = new Node(value);
         newNode.next = current.next;
         current.next = newNode;
+        ++this.#size;
     }
 
     erase(index) {
@@ -189,23 +185,28 @@ class SinglyLinkedList {
         if (this.empty()) {
             throw new Error("List is empty");
         }
-        if (index >= this.size() || index < 0) {
+        if (index >= this.#size || index < 0) {
             throw new Error("Invalid index");
     
         }
         
         if (index === 0) {
-            this.popFront();
-            return;
+            return this.popFront();
         }
 
         let current = this.#head;
-        while(index != 1 && current) {
+
+        while(index > 1) {
             current = current.next;
             --index;
         } 
 
-        current.next = current.next.next;
+        const deleted = current.next;
+        current.next = deleted.next;
+
+        --this.#size;
+        
+        return deleted.value;
     }
 
     find(value) {
@@ -237,7 +238,7 @@ class SinglyLinkedList {
     }
 
     toArray() {
-        let arr = new Array(this.size());
+        let arr = new Array(this.#size);
         let current = this.#head;
         let idx = 0;
 
@@ -262,7 +263,7 @@ class SinglyLinkedList {
             current = next;
         } 
 
-        return this.#head = previous;
+        this.#head = previous;
     }
 
     *[Symbol.iterator]() {
@@ -285,10 +286,10 @@ class SinglyLinkedList {
     }
 
     sort() {
-        this.#head = this.mergeSort(this.#head);
+        this.#head = this.#mergeSort(this.#head);
     }
 
-    mergeSort(head) {
+    #mergeSort(head) {
         if (!head || !head.next) {
             return head;
         }
@@ -296,8 +297,8 @@ class SinglyLinkedList {
         let mid = this.#getMiddle(head);
         let rightHead = mid.next;
         mid.next = null;
-        head = this.mergeSort(head);
-        rightHead = this.mergeSort(rightHead);
+        head = this.#mergeSort(head);
+        rightHead = this.#mergeSort(rightHead);
         return this.#merge(head, rightHead);
     }
 
